@@ -1,0 +1,273 @@
+// Fonts
+$normal: 400;
+$bold: 600;
+
+
+// Colors
+$white: white;
+
+$cyan-hsl: 171, 66%, 44%;
+$cyan: hsl($cyan-hsl...);
+$blue-hsl: 233, 100%, 69%;
+$blue: hsl($blue-hsl...);
+
+$dark-gray: hsl(210, 10%, 33%);
+$gray: hsl(201, 11%, 66%);
+
+// page info
+$page-margin: 32;
+
+// grid layout (in unitless px)
+$grid-columns: 12;
+$grid-gap: 16;
+$grid-column-width: 82;
+$grid-margin: $page-margin;
+$grid-max: #{$grid-column-width * $grid-columns + $grid-gap * ($grid-columns - 1)};
+
+$grid-template-columns: repeat(12, [grid-column] 1fr);
+// including margins allows us to place items to the edges of the page
+$page-template-columns:
+  [page-start]
+    minmax(#{$grid-margin}px, calc((100vw - #{$grid-max}px) / 2))
+    [grid-start] #{$grid-template-columns} [grid-end]
+    minmax(#{$grid-margin}px, calc((100vw - #{$grid-max}px) / 2))
+  [page-end];
+
+// Breakpoints
+$mobile: 375px;
+$desktop: 1160px;
+
+
+@function grid-span($column-count: 1) {
+  @return #{$grid-column-width * $column-count + $grid-gap * ($column-count - 1)};
+}
+
+/// Remove the unit of a length
+/// @param {Number} $number - Number to remove unit from
+/// @return {Number} - Unitless number
+/// @see https://css-tricks.com/snippets/sass/strip-unit-function/
+@function strip-unit($number) {
+  @if type-of($number) == 'number' and not unitless($number) {
+    @return $number / ($number * 0 + 1);
+  }
+
+  @return $number;
+}
+
+
+// lets set some fluid spacing CSS Props
+// see https://css-tricks.com/snippets/css/fluid-typography/
+:root {
+  $fluid-spacing-min: 16 24 32  64;
+  $fluid-spacing-max: 24 64 128 150;
+
+  @for $i from 1 through length($fluid-spacing-min) {
+    $min: nth($fluid-spacing-min, $i);
+    $max: nth($fluid-spacing-max, $i);
+
+    --fluid-spacing-#{$i}: #{$min}px;
+  }
+
+  @media screen and (min-width: $mobile) {
+    @for $i from 1 through length($fluid-spacing-min) {
+      $min: nth($fluid-spacing-min, $i);
+      $max: nth($fluid-spacing-max, $i);
+      $mq-delta: strip-unit($desktop - $mobile);
+      --fluid-spacing-#{$i}: calc(#{$min}px + #{$max - $min} * ((100vw - #{$mobile}) / #{$mq-delta}));
+    }
+  }
+
+  @media screen and (min-width: $desktop) {
+    @for $i from 1 through length($fluid-spacing-min) {
+      $max: nth($fluid-spacing-max, $i);
+      --fluid-spacing-#{$i}: #{$max}px;
+    }
+  }
+}
+
+// even spacing between elements
+*,
+*::before,
+*::after {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+* + * {
+  margin-top: 1em;
+}
+
+html {
+  font-family: 'Bai Jamjuree', sans-serif;
+  line-height: 1.5;
+  font-weight: $normal;
+  font-size: 18px;
+}
+
+.page__header {
+  text-align: center;
+}
+
+.page__header, .page__content {
+  text-align: center;
+  display: grid;
+  //padding: 0 32px;
+  grid-template-columns: $page-template-columns;
+
+  > * {
+    grid-column: grid-column 3 / span 8;
+    justify-self: center;
+  }
+
+  > * + * {
+    margin-top: var(--fluid-spacing-4);
+  }
+}
+
+.logos {
+  grid-column: grid;
+  justify-self: center;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  margin-top: calc(var(--fluid-spacing-4) - 1em);
+  margin-left: calc(var(--fluid-spacing-3) * -1);
+
+  > * {
+    margin: 2em 0 0 var(--fluid-spacing-3);
+  }
+
+  &__image {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+.media {
+
+  color: $gray;
+
+  & * + & {
+    margin-top: var(--fluid-spacing-2);
+  }
+
+  &__heading {
+    color: $dark-gray;
+    font-weight: $bold;
+  }
+
+  &__image {
+    width: 100%;
+    height: auto;
+
+    * + & {
+      margin-top: var(--fluid-spacing-3);
+    }
+  }
+
+  &__description {
+    * + & {
+      margin-top: var(--fluid-spacing-1);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+
+    margin: 0 0 0 -1em;
+
+    > * {
+      margin: 1em 0 0 1em;
+      padding: 0 2em;
+      flex: 1 0 max-content;
+      font-weight: $bold;
+
+      + * {
+        margin-left: 1em;
+      }
+    }
+  }
+
+  &__action {
+    --hsl: #{$blue-hsl};
+    --drop-shadow: 0 0 0 transparent;
+
+    display: block;
+    line-height: 3;
+    text-align: center;
+    border-radius: 100vmax;
+    background-color: unquote("hsl(var(--hsl))");
+    color: $white;
+    text-decoration: none;
+    box-shadow:
+      inset 0px -3px 2px rgba(0,0,0,0.2),
+      var(--drop-shadow);
+
+    &:hover,
+    &:focus {
+      --drop-shadow: #{0 10px 20px unquote("hsla(var(--hsl), .2)")};
+    }
+
+    ~ * {
+      --hsl: #{$cyan-hsl};
+    }
+  }
+
+  @media screen and (min-width: $desktop) {
+    &--image-aside {
+      grid-column: page;
+
+      display: grid;
+      grid-template-columns: $page-template-columns;
+      justify-items: end;
+      max-width: none;
+    }
+
+    &--image-aside &__image {
+      grid-column: page / grid-column 7;
+      height: max-content;
+      width: auto;
+      max-width: none;
+      object-fit: cover;
+      object-position: right center;
+    }
+
+    &--image-aside &__description {
+      text-align: left;
+      grid-column: grid-column 8 / span 4;
+    }
+  }
+
+  &--with-icon {
+    display: flex;
+    flex-direction: column;
+
+    > * {
+      order: 2;
+    }
+  }
+
+  &--with-icon &__heading {
+    margin-top: var(--fluid-spacing-3);
+  }
+
+  &--with-icon &__icon {
+    order: 1;
+  }
+}
+
+
+.attribution {
+  font-size: 11px;
+  text-align: center;
+}
+
+
+.attribution a {
+  color: hsl(228, 45%, 44%);
+}
